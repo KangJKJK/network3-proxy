@@ -43,7 +43,7 @@ if [ -f "manager.sh" ]; then
     echo "manager.sh 파일을 수정합니다."
     # 필요한 수정 내용 추가
     sed -i '/^set_config()/,/\}/ { 
-        s/^\(\s*WG_NEW_KEY="\)\(.*\)\("\)/\1\$(wg genkey)\3/
+        s/\(WG_NEW_KEY="\)\(.*\)\("\)/\1\$(wg genkey)\3/
     }' manager.sh
 fi
 
@@ -74,7 +74,7 @@ for proxy in $(< proxy.txt); do
     export https_proxy="$proxy"  # HTTPS 프록시 설정
 
     # 노드를 백그라운드에서 실행
-    sudo -E bash manager.sh up
+    sudo -E bash manager.sh up &
 
     # 개인키 확인
     req "노드의 개인키를 확인하시고 적어두세요." sudo -E bash /root/ubuntu-node/manager.sh key
@@ -102,4 +102,3 @@ done
 
 echo -e "${GREEN}모든 작업이 완료되었습니다. 컨트롤+A+D로 스크린을 종료해주세요.${NC}"
 echo -e "${GREEN}스크립트 작성자: https://t.me/kjkresearch${NC}"
-
