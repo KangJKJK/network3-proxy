@@ -90,12 +90,8 @@ for proxy in $(< proxy.txt); do
     echo "사용 가능한 포트: $port"
 
     # 노드를 백그라운드에서 실행하는 함수
-    run_manager() {
-        NODE_PORT="$port" sudo -E bash /root/ubuntu-node/manager.sh up
-    }
-
-    # 함수 호출
-    run_manager
+    export NODE_PORT="$port"
+    sudo -E bash /root/ubuntu-node/manager.sh up
 
     # 개인키 확인
     req "노드의 개인키를 확인하시고 적어두세요." sudo -E bash /root/ubuntu-node/manager.sh key
