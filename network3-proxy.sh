@@ -39,7 +39,9 @@ cd ubuntu-node
 # 프록시 입력받기
 echo -e "${YELLOW}보유하신 모든 Proxy를 chatgpt에게 다음과 같은 형식으로 변환해달라고 하세요.${NC}"
 echo -e "${YELLOW}이러한 형태로 각 프록시를 한줄에 하나씩 입력하세요: http://username:password@proxy_host:port${NC}"
+echo -e "${YELLOW}마지막 프록시 입력 후 빈 줄을 입력하면 종료됩니다.${NC}"
 > proxy.txt  # proxy.txt 파일 초기화
+
 while true; do
     read -r proxy
     if [ -z "$proxy" ]; then
@@ -61,7 +63,7 @@ while IFS= read -r proxy; do
     # sudo -E로 프록시 설정을 상속하여 백그라운드에서 실행
     sudo -E bash manager.sh up &
 
-    # 개인키 확인은 백그라운드에서 실행하지 않음 (프록시별로 다르게 작동 가능)
+    # 개인키 확인
     req "노드의 개인키를 확인하시고 적어두세요." sudo -E bash /root/ubuntu-node/manager.sh key
 
     # IP 주소 확인
@@ -77,7 +79,7 @@ while IFS= read -r proxy; do
     
     # 사용자 확인을 위해 입력 대기
     echo -e "${BOLD}계속 진행하려면 엔터를 눌러 주세요.${NC}"
-    read -r </dev/tty  # 사용자가 엔터를 누르기를 기다림
+    read -r  # 사용자가 엔터를 누르기를 기다림
 
 done < proxy.txt
 
