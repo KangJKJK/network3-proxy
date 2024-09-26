@@ -74,7 +74,7 @@ for proxy in $(< proxy.txt); do
     export https_proxy="$proxy"  # HTTPS 프록시 설정
 
     # 노드를 백그라운드에서 실행
-    sudo -E bash manager.sh up &
+    sudo -E bash manager.sh up
 
     # 개인키 확인
     req "노드의 개인키를 확인하시고 적어두세요." sudo -E bash /root/ubuntu-node/manager.sh key
