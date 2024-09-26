@@ -88,9 +88,9 @@ for proxy in $(< proxy.txt); do
     # 스크립트 실행
     echo "사용 가능한 포트: $port"
 
-    # 노드를 백그라운드에서 실행
-    # 포트를 매개변수로 전달하여 manager.sh 실행
-    sudo -E bash manager.sh up "$port"
+    # 포트를 변경하여 노드를 백그라운드에서 실행
+    export NODE_PORT="$port"
+    sudo -E bash manager.sh up
 
     # 개인키 확인
     req "노드의 개인키를 확인하시고 적어두세요." sudo -E bash /root/ubuntu-node/manager.sh key
