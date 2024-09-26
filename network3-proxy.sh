@@ -38,15 +38,6 @@ rm -rf ubuntu-node-v2.1.0.tar && \
 # 압축 해제된 ubuntu-node 디렉토리로 이동합니다.
 cd ubuntu-node
 
-# manager.sh 파일 수정
-if [ -f "manager.sh" ]; then
-    echo "manager.sh 파일을 수정합니다."
-    # 필요한 수정 내용 추가
-    sed -i '/^set_config()/,/\}/ { 
-        s/\(WG_NEW_KEY="\)\(.*\)\("\)/\1\$(wg genkey)\3/
-    }' manager.sh
-fi
-
 # 프록시 입력받기
 echo -e "${YELLOW}보유하신 모든 Proxy를 chatgpt에게 다음과 같은 형식으로 변환해달라고 하세요.${NC}"
 echo -e "${YELLOW}이러한 형태로 각 프록시를 한줄에 하나씩 입력하세요: http://username:password@proxy_host:port${NC}"
