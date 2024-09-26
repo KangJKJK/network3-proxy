@@ -70,16 +70,16 @@ for proxy in $(< proxy.txt); do
     mkdir -p /usr/local/etc/wireguard
     apt install wireguard-tools
     wg genkey > /usr/local/etc/wireguard/utun.key
-    
+
     # 기본 포트 설정
-    port=8080
+    base_port=8080
     port=$base_port
 
     # 포트가 사용 중인지 확인하는 함수
     check_port() {
-    while netstat -tuln | grep -q ":$port"; do
-    ((port++)) # 다음 포트로 증가
-    done
+        while netstat -tuln | grep -q ":$port"; do
+            ((port++)) # 다음 포트로 증가
+        done
     }
 
     # 사용 가능한 포트 찾기
@@ -89,7 +89,8 @@ for proxy in $(< proxy.txt); do
     echo "사용 가능한 포트: $port"
 
     # 노드를 백그라운드에서 실행
-    sudo -E bash manager.sh up --port $port
+    # 포트를 매개변수로 전달하여 manager.sh 실행
+    sudo -E bash manager.sh up "$port"
 
     # 개인키 확인
     req "노드의 개인키를 확인하시고 적어두세요." sudo -E bash /root/ubuntu-node/manager.sh key
@@ -103,7 +104,7 @@ for proxy in $(< proxy.txt); do
     req "사용자의 IP주소를 확인합니다." echo "사용자의 IP는 ${IP_ADDRESS}입니다."
 
     # 웹계정과 연동
-    URL="https://account.network3.ai/main?o=${IP_ADDRESS}:8080"
+    URL="https://account.network3.ai/main?o=${IP_ADDRESS}:$port"
     echo -e "${GREEN}웹계정과 연동을 진행합니다.${NC}"
     echo -e "${YELLOW}다음 URL로 접속하세요: ${URL}${NC}"
     echo -e "${YELLOW}1. 좌측 상단의 Login버튼을 누르고 이메일 계정으로 로그인을 진행하세요.${NC}"
