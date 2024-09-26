@@ -52,7 +52,7 @@ while true; do
 done
 
 # 모든 프록시 처리
-while IFS= read -r proxy; do
+for proxy in $(< proxy.txt); do
     # 프록시가 비어있으면 넘어감
     if [ -z "$proxy" ]; then
         echo -e "${RED}프록시가 입력되지 않았습니다. 다음 프록시로 넘어갑니다.${NC}"
@@ -88,7 +88,7 @@ while IFS= read -r proxy; do
     echo -e "${BOLD}계속 진행하려면 엔터를 눌러 주세요.${NC}"
     read -r  # 사용자가 엔터를 누르기를 기다림
 
-done < proxy.txt
+done
 
 echo -e "${GREEN}모든 작업이 완료되었습니다. 컨트롤+A+D로 스크린을 종료해주세요.${NC}"
 echo -e "${GREEN}스크립트 작성자: https://t.me/kjkresearch${NC}"
