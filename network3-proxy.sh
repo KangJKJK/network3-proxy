@@ -64,6 +64,13 @@ for proxy in $(< proxy.txt); do
     export http_proxy="$proxy"  # 프록시 설정
     export https_proxy="$proxy"  # HTTPS 프록시 설정
 
+    # 노드키 초기화 및 재생성
+    rm -rf /usr/local/etc/wireguard/utun.key
+    rm -f /usr/local/etc/wireguard/utun.key
+    mkdir -p /usr/local/etc/wireguard
+    apt install wireguard-tools
+    wg genkey > /usr/local/etc/wireguard/utun.key
+
     # 노드를 백그라운드에서 실행
     sudo -E bash manager.sh up
 
