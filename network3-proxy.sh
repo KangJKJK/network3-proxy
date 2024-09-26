@@ -36,11 +36,6 @@ rm -rf ubuntu-node-v2.1.0.tar && \
 # 압축 해제된 ubuntu-node 디렉토리로 이동합니다.
 cd ubuntu-node
 
-# 프록시 입력받기
-echo -e "${YELLOW}보유하신 모든 Proxy를 chatgpt에게 다음과 같은 형식으로 변환해달라고 하세요.${NC}"
-echo -e "${YELLOW}이러한 형태로 각 프록시를 한줄에 하나씩 입력하세요: http://username:password@proxy_host:port${NC}"
-echo -e "${YELLOW}프록시 입력 후 빈 줄을 입력하면 종료됩니다.${NC}"
-> proxy.txt  # proxy.txt 파일 초기화
 
 # 프록시 입력받기
 echo -e "${YELLOW}보유하신 모든 Proxy를 chatgpt에게 다음과 같은 형식으로 변환해달라고 하세요.${NC}"
@@ -94,12 +89,6 @@ while IFS= read -r proxy; do
     read -r  # 사용자가 엔터를 누르기를 기다림
 
 done < proxy.txt
-
-echo -e "${GREEN}모든 작업이 완료되었습니다. 컨트롤+A+D로 스크린을 종료해주세요.${NC}"
-echo -e "${BOLD}스크립트 작성자: https://t.me/kjkresearch${NC}"
-
-
-
 
 echo -e "${GREEN}모든 작업이 완료되었습니다. 컨트롤+A+D로 스크린을 종료해주세요.${NC}"
 echo -e "${GREEN}스크립트 작성자: https://t.me/kjkresearch${NC}"
