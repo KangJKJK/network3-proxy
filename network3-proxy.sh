@@ -23,7 +23,9 @@ if [ -d "/root/ubuntu-node" ]; then
   echo -e "${RED}/root/ubuntu-node 폴더가 존재하므로 삭제합니다.${NC}"
   sudo rm -rf /root/ubuntu-node
 fi
-apt install net-tools
+
+# net-tools 설치
+apt install net-tools -y
 
 # 홈 디렉토리로 이동합니다.
 cd $HOME
@@ -36,6 +38,14 @@ rm -rf ubuntu-node-v2.1.0.tar && \
 # 압축 해제된 ubuntu-node 디렉토리로 이동합니다.
 cd ubuntu-node
 
+# manager.sh 파일 수정
+if [ -f "manager.sh" ]; then
+    echo "manager.sh 파일을 수정합니다."
+    # 필요한 수정 내용 추가
+    sed -i '/^set_config()/,/\}/ { 
+        s/^\(\s*WG_NEW_KEY="\)\(.*\)\("\)/\1\$(wg genkey)\3/
+    }' manager.sh
+fi
 
 # 프록시 입력받기
 echo -e "${YELLOW}보유하신 모든 Proxy를 chatgpt에게 다음과 같은 형식으로 변환해달라고 하세요.${NC}"
@@ -92,3 +102,4 @@ done
 
 echo -e "${GREEN}모든 작업이 완료되었습니다. 컨트롤+A+D로 스크린을 종료해주세요.${NC}"
 echo -e "${GREEN}스크립트 작성자: https://t.me/kjkresearch${NC}"
+
