@@ -26,6 +26,7 @@ fi
 
 # net-tools 설치
 apt install net-tools -y
+sudo get update
 
 # 홈 디렉토리로 이동합니다.
 cd $HOME
