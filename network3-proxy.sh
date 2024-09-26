@@ -36,8 +36,24 @@ rm -rf ubuntu-node-v2.1.0.tar && \
 # 압축 해제된 ubuntu-node 디렉토리로 이동합니다.
 cd ubuntu-node
 
-# 노드를 실행합니다.
-sudo bash manager.sh up
+# 프록시 입력받기
+echo -e "${YELLOW}여러 개의 프록시를 입력하세요 (엔터로 구분, 완료 후 빈 줄 입력):${NC}"
+> proxy.txt  # proxy.txt 파일 초기화
+while true; do
+    read -r proxy
+    if [ -z "$proxy" ]; then
+        break
+    fi
+    echo "$proxy" >> proxy.txt
+done
+
+# proxy.txt의 모든 프록시로 노드를 실행합니다.
+while IFS= read -r proxy; do
+    echo -e "${GREEN}프록시 ${proxy}로 노드를 실행합니다.${NC}"
+    export http_proxy="$proxy"  # 프록시 설정
+    export https_proxy="$proxy"  # HTTPS 프록시 설정
+    sudo bash manager.sh up
+done < proxy.txt
 
 # 노드의 개인키 및 본인의 IP를 표시합니다.
 req "노드의 개인키를 확인하시고 적어두세요." sudo bash /root/ubuntu-node/manager.sh key
