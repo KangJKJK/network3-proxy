@@ -81,8 +81,5 @@ while IFS= read -r proxy; do
 
 done < proxy.txt
 
-# 백그라운드에서 실행 중인 모든 작업이 끝날 때까지 기다립니다.
-wait  # 모든 백그라운드 작업을 완료할 때까지 대기
-
 echo -e "${GREEN}모든 작업이 완료되었습니다. 컨트롤+A+D로 스크린을 종료해주세요.${NC}"
 echo -e "${GREEN}스크립트 작성자: https://t.me/kjkresearch${NC}"
