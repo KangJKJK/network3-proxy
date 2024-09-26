@@ -48,24 +48,41 @@ while true; do
     echo "$proxy" >> proxy.txt
 done
 
-# proxy.txt의 모든 프록시로 노드를 실행합니다.
 while IFS= read -r proxy; do
-    echo -e "${GREEN}프록시 ${proxy}로 노드를 실행합니다.${NC}"
+    if [ -z "$proxy" ]; then
+        echo -e "${RED}프록시가 입력되지 않았습니다. 다음 프록시로 넘어갑니다.${NC}"
+        continue  # 프록시가 비어있다면 다음으로 진행
+    fi
+
+    echo -e "${GREEN}프록시 ${proxy}로 노드를 백그라운드에서 실행합니다.${NC}"
     export http_proxy="$proxy"  # 프록시 설정
     export https_proxy="$proxy"  # HTTPS 프록시 설정
-    sudo bash manager.sh up
-    req "노드의 개인키를 확인하시고 적어두세요." sudo bash /root/ubuntu-node/manager.sh key
-    IP_ADDRESS=$(curl -s ifconfig.me)
+
+    # sudo -E로 프록시 설정을 상속하여 백그라운드에서 실행
+    sudo -E bash manager.sh up &
+
+    # 개인키 확인은 백그라운드에서 실행하지 않음 (프록시별로 다르게 작동 가능)
+    req "노드의 개인키를 확인하시고 적어두세요." sudo -E bash /root/ubuntu-node/manager.sh key
+
+    # IP 주소 확인
+    IP_ADDRESS=$(curl -s ifconfig.me)  # curl에 프록시 설정이 자동 적용됩니다
     req "사용자의 IP주소를 확인합니다." echo "사용자의 IP는 ${IP_ADDRESS}입니다."
-    # 웹계정과의 연동을 진행합니다.
+
+    # 웹계정과 연동
     URL="https://account.network3.ai/main?o=${IP_ADDRESS}:8080"
     echo -e "${GREEN}웹계정과 연동을 진행합니다.${NC}"
     echo -e "${YELLOW}다음 URL로 접속하세요: ${URL}${NC}"
-    echo -e "${YELLOW}1.좌측 상단의 Login버튼을 누르고 이메일계정으로 로그인을 진행하세요.${NC}"
-    echo -e "${YELLOW}2.다시 URL로 접속하신 후 Current node에서 +버튼을 누르고 노드의 개인키를 적어주세요.${NC}"
+    echo -e "${YELLOW}1. 좌측 상단의 Login버튼을 누르고 이메일 계정으로 로그인을 진행하세요.${NC}"
+    echo -e "${YELLOW}2. 다시 URL로 접속하신 후 Current node에서 +버튼을 누르고 노드의 개인키를 적어주세요.${NC}"
+    
+    # 사용자 확인을 위해 입력 대기
     echo -e "${BOLD}계속 진행하려면 엔터를 눌러 주세요.${NC}"
     read -r </dev/tty  # 사용자가 엔터를 누르기를 기다림
+
 done < proxy.txt
+
+# 백그라운드에서 실행 중인 모든 작업이 끝날 때까지 기다립니다.
+wait  # 모든 백그라운드 작업을 완료할 때까지 대기
 
 echo -e "${GREEN}모든 작업이 완료되었습니다. 컨트롤+A+D로 스크린을 종료해주세요.${NC}"
 echo -e "${GREEN}스크립트 작성자: https://t.me/kjkresearch${NC}"
