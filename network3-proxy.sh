@@ -64,7 +64,7 @@ while IFS= read -r proxy; do
     echo -e "${YELLOW}1.좌측 상단의 Login버튼을 누르고 이메일계정으로 로그인을 진행하세요.${NC}"
     echo -e "${YELLOW}2.다시 URL로 접속하신 후 Current node에서 +버튼을 누르고 노드의 개인키를 적어주세요.${NC}"
     echo -e "${BOLD}계속 진행하려면 엔터를 눌러 주세요.${NC}"
-    read -r
+    read -r </dev/tty  # 사용자가 엔터를 누르기를 기다림
 done < proxy.txt
 
 echo -e "${GREEN}모든 작업이 완료되었습니다. 컨트롤+A+D로 스크린을 종료해주세요.${NC}"
