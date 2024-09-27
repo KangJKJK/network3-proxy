@@ -70,27 +70,9 @@ for proxy in $(< proxy.txt); do
     apt install wireguard-tools
     wg genkey > /usr/local/etc/wireguard/utun.key
 
-    # 기본 포트 설정
-    base_port=8080
-    port=$base_port
-
-    # 포트가 사용 중인지 확인하는 함수
-    check_port() {
-        while netstat -tuln | grep -q ":$port"; do
-            ((port++)) # 다음 포트로 증가
-        done
-    }
-
-    # 사용 가능한 포트 찾기
-    check_port
-
-    # 스크립트 실행
-    echo "사용 가능한 포트: $port"
-
     # 노드를 백그라운드에서 실행하는 함수
-    export NODE_PORT="$port"
-    sudo -E bash /root/ubuntu-node/manager.sh up "$port"  # 포트를 매개변수로 전달
-
+    sudo -E bash /root/ubuntu-node/manager.sh up
+    
     # 개인키 확인
     req "노드의 개인키를 확인하시고 적어두세요." sudo -E bash /root/ubuntu-node/manager.sh key
 
