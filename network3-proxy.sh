@@ -89,7 +89,7 @@ for proxy in $(< proxy.txt); do
 
     # 노드를 백그라운드에서 실행하는 함수
     export NODE_PORT="$port"
-    sudo -E bash /root/ubuntu-node/manager.sh up
+    sudo -E bash /root/ubuntu-node/manager.sh up "$port"  # 포트를 매개변수로 전달
 
     # 개인키 확인
     req "노드의 개인키를 확인하시고 적어두세요." sudo -E bash /root/ubuntu-node/manager.sh key
