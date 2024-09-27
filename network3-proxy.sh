@@ -85,7 +85,7 @@ for proxy in $(< proxy.txt); do
     req "사용자의 IP주소를 확인합니다." echo "사용자의 IP는 ${IP_ADDRESS}입니다."
 
     #포트확인
-    PORT=$(bash /path/to/manager.sh)
+    source /path/to/manager.sh
     
     # 웹계정과 연동
     URL="https://account.network3.ai/main?o=${IP_ADDRESS}:${PORT}"
