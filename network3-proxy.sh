@@ -84,8 +84,11 @@ for proxy in $(< proxy.txt); do
     fi
     req "사용자의 IP주소를 확인합니다." echo "사용자의 IP는 ${IP_ADDRESS}입니다."
 
+    #포트확인
+    PORT=$(bash /path/to/manager.sh)
+    
     # 웹계정과 연동
-    URL="https://account.network3.ai/main?o=${IP_ADDRESS}:$port"
+    URL="https://account.network3.ai/main?o=${IP_ADDRESS}:${PORT}"
     echo "You can access the dashboard by opening https://account.network3.ai/main?o=$(hostname -I | awk '{print $1}'):$PORT in Chrome." >&2
     echo -e "${GREEN}웹계정과 연동을 진행합니다.${NC}"
     echo -e "${YELLOW}다음 URL로 접속하세요: ${URL}${NC}"
