@@ -40,7 +40,7 @@ cd ubuntu-node
 # 프록시 입력받기
 echo -e "${YELLOW}보유하신 모든 Proxy를 chatgpt에게 다음과 같은 형식으로 변환해달라고 하세요.${NC}"
 echo -e "${YELLOW}이러한 형태로 각 프록시를 한줄에 하나씩 입력하세요: http://username:password@proxy_host:port${NC}"
-echo -e "${YELLOW}프록시 입력 후 빈 줄을 입력하면 종료됩니다.${NC}"
+echo -e "${YELLOW}프록시 입력 후 엔터를 두번 누르면 됩니다.${NC}"
 > proxy.txt  # proxy.txt 파일 초기화
 
 while true; do
