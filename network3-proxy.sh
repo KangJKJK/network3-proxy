@@ -84,7 +84,7 @@ for proxy in $(< proxy.txt); do
     fi
     req "사용자의 IP주소를 확인합니다." echo "사용자의 IP는 ${IP_ADDRESS}입니다."
 
-    #포트확인
+    #포트 환경변수 불러오기
     source /path/to/manager.sh
     
     # 웹계정과 연동
