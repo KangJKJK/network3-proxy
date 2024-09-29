@@ -90,7 +90,7 @@ for proxy in $(< proxy.txt); do
     source /path/to/manager.sh
     
     # 웹계정과 연동
-    URL="https://account.network3.ai/main?o=${IP_ADDRESS}:${PORT}"
+    URL="https://account.network3.ai/main?o=${IP_ADDRESS}:8080"
     echo "You can access the dashboard by opening https://account.network3.ai/main?o=$(hostname -I | awk '{print $1}'):$PORT in Chrome." >&2
     echo -e "${GREEN}웹계정과 연동을 진행합니다.${NC}"
     echo -e "${YELLOW}다음 URL로 접속하세요: ${URL}${NC}"
