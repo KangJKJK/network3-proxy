@@ -27,14 +27,17 @@ fi
 # 디렉토리 생성
 sudo mkdir -p /root/ubuntu-node
 
-# 디렉토리로 이동
-cd /root/ubuntu-node
+# GitHub에서 클론
+git clone --depth 1 https://github.com/KangJKJK/network3-base.git /tmp/network3-base
 
-# Git 리포지토리 클론
-sudo git clone https://github.com/KangJKJK/network3-base
+# 파일들을 /root/ubuntu-node로 이동
+sudo mv /tmp/network3-base/* /root/ubuntu-node/
+
+# 이동 후 임시 폴더 삭제
+sudo rm -rf /tmp/network3-base
 
 # manager.sh 파일에 실행 권한 부여
-sudo chmod +x manager.sh
+sudo chmod +x /root/ubuntu-node/manager.sh
 
 # 프록시 입력받기
 echo -e "${YELLOW}보유하신 모든 Proxy를 chatgpt에게 다음과 같은 형식으로 변환해달라고 하세요.${NC}"
