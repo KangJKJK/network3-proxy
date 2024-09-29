@@ -103,6 +103,9 @@ for proxy in $(< proxy.txt); do
       echo -e "${GREEN}포트 $CURRENT_PORT 을(를) 방화벽에서 열었습니다.${NC}"
     }
 
+    # 포트 변경 함수 호출
+    change_port  # 이 부분 추가
+
     # 노드를 백그라운드에서 실행하는 함수
     sudo -E bash /root/ubuntu-node/manager.sh up
     
