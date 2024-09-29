@@ -75,9 +75,6 @@ for proxy in $(< proxy.txt); do
     # 네트워크 설치 스크립트 시작
     echo -e "${GREEN}Network3 노드를 실행합니다.${NC}"
 
-    # 노드를 백그라운드에서 실행하는 함수
-    sudo -E bash /root/ubuntu-node/manager.sh up
-
     # ListenPort 값을 변경하는 함수
     change_port() {
       WG_CONFIG="/root/ubuntu-node/wg0.conf"
@@ -105,6 +102,9 @@ for proxy in $(< proxy.txt); do
       sudo ufw allow $CURRENT_PORT
       echo -e "${GREEN}포트 $CURRENT_PORT 을(를) 방화벽에서 열었습니다.${NC}"
     }
+
+    # 노드를 백그라운드에서 실행하는 함수
+    sudo -E bash /root/ubuntu-node/manager.sh up
     
     # 개인키 확인
     req "노드의 개인키를 확인하시고 적어두세요." sudo -E bash /root/ubuntu-node/manager.sh key
