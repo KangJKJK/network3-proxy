@@ -24,17 +24,23 @@ if [ -d "/root/ubuntu-node" ]; then
   sudo rm -rf /root/ubuntu-node
 fi
 
-# net-tools 설치
-apt install net-tools -y
-sudo get update
+# 디렉토리 생성
+sudo mkdir -p /root/ubuntu-node
+
+# 디렉토리로 이동
+cd /root/ubuntu-node
+
+# Git 리포지토리 클론
+sudo git clone https://github.com/KangJKJK/network3-base
+
+# manager.sh 파일에 실행 권한 부여
+sudo chmod +x manager.sh
 
 # 홈 디렉토리로 이동합니다.
 cd $HOME
 
 # 지정된 URL에서 ubuntu-node-v2.1.0.tar 파일을 다운로드합니다.
-wget https://network3.io/ubuntu-node-v2.1.0.tar && \
-tar -xf ubuntu-node-v2.1.0.tar && \
-rm -rf ubuntu-node-v2.1.0.tar && \
+sudo apt update && sudo apt install git -y && sudo git clone https://github.com/KangJKJK/network3-base /root/ubuntu && sudo chmod +x /root/ubuntu/manager.sh
 
 # 압축 해제된 ubuntu-node 디렉토리로 이동합니다.
 cd ubuntu-node
