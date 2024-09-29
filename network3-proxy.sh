@@ -36,15 +36,6 @@ sudo git clone https://github.com/KangJKJK/network3-base
 # manager.sh 파일에 실행 권한 부여
 sudo chmod +x manager.sh
 
-# 홈 디렉토리로 이동합니다.
-cd $HOME
-
-# 지정된 URL에서 ubuntu-node-v2.1.0.tar 파일을 다운로드합니다.
-sudo apt update && sudo apt install git -y && sudo git clone https://github.com/KangJKJK/network3-base /root/ubuntu && sudo chmod +x /root/ubuntu/manager.sh
-
-# 압축 해제된 ubuntu-node 디렉토리로 이동합니다.
-cd ubuntu-node
-
 # 프록시 입력받기
 echo -e "${YELLOW}보유하신 모든 Proxy를 chatgpt에게 다음과 같은 형식으로 변환해달라고 하세요.${NC}"
 echo -e "${YELLOW}이러한 형태로 각 프록시를 한줄에 하나씩 입력하세요: http://username:password@proxy_host:port${NC}"
