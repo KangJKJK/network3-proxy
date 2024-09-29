@@ -29,14 +29,8 @@ sudo mkdir -p /root/ubuntu-node
 
 # 파일 다운로드 및 압축 해제
 cd /root/ubuntu-node
-sudo wget -qO- https://github.com/KangJKJK/network3-base/archive/refs/heads/main.zip | sudo unzip -o - && sudo rm -rf *.zip
 
-# 필요한 파일 권한 설정
-sudo chmod +x /root/ubuntu-node/network3-base-main/manager.sh
-
-# 필요한 파일들을 /root/ubuntu-node로 이동
-sudo mv /root/ubuntu-node/network3-base-main/* /root/ubuntu-node/
-sudo rm -rf /root/ubuntu-node/network3-base-main
+sudo git clone https://github.com/KangJKJK/network3-base /root/ubuntu-node
 
 # 프록시 입력받기
 echo -e "${YELLOW}보유하신 모든 Proxy를 chatgpt에게 다음과 같은 형식으로 변환해달라고 하세요.${NC}"
