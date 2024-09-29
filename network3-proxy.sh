@@ -71,14 +71,21 @@ for proxy in $(< proxy.txt); do
     mkdir -p /usr/local/etc/wireguard
     apt install wireguard-tools
     wg genkey > /usr/local/etc/wireguard/utun.key
+    
+    # 네트워크 설치 스크립트 시작
+    echo -e "${GREEN}Network3 노드를 실행합니다.${NC}"
+
+    # 노드를 백그라운드에서 실행하는 함수
+    sudo -E bash /root/ubuntu-node/manager.sh up
 
     # ListenPort 값을 변경하는 함수
     change_port() {
       WG_CONFIG="/root/ubuntu-node/wg0.conf"
       DEFAULT_PORT=1433
       CURRENT_PORT=$DEFAULT_PORT
-  
-      while netstat -tuln | grep -q ":$CURRENT_PORT "; do
+
+      # 포트가 사용 중인지 확인
+      while sudo netstat -tuln | grep -q ":$CURRENT_PORT "; do
         echo -e "${YELLOW}포트 $CURRENT_PORT 가 사용 중입니다. 다음 포트로 시도합니다.${NC}"
         CURRENT_PORT=$((CURRENT_PORT + 1))
       done
@@ -87,23 +94,17 @@ for proxy in $(< proxy.txt); do
 
       # wg0.conf 파일의 ListenPort 값을 변경
       if [ -f "$WG_CONFIG" ]; then
-        sudo sed -i "s/^ListenPort.*/ListenPort = $CURRENT_PORT/" "$WG_CONFIG"
+        sudo sed -i "s/^ListenPort *=.*/ListenPort = $CURRENT_PORT/" "$WG_CONFIG"
         echo -e "${GREEN}ListenPort를 $CURRENT_PORT 로 변경했습니다.${NC}"
       else
         echo -e "${RED}$WG_CONFIG 파일을 찾을 수 없습니다.${NC}"
         exit 1
       fi
-  
+
       # 포트 열기
       sudo ufw allow $CURRENT_PORT
       echo -e "${GREEN}포트 $CURRENT_PORT 을(를) 방화벽에서 열었습니다.${NC}"
     }
-    
-    # 네트워크 설치 스크립트 시작
-    echo -e "${GREEN}Network3 노드를 실행합니다.${NC}"
-
-    # 노드를 백그라운드에서 실행하는 함수
-    sudo -E bash /root/ubuntu-node/manager.sh up
     
     # 개인키 확인
     req "노드의 개인키를 확인하시고 적어두세요." sudo -E bash /root/ubuntu-node/manager.sh key
@@ -115,9 +116,6 @@ for proxy in $(< proxy.txt); do
         continue
     fi
     req "사용자의 IP주소를 확인합니다." echo "사용자의 IP는 ${IP_ADDRESS}입니다."
-
-    #포트 환경변수 불러오기
-    source /path/to/manager.sh
     
     # 웹계정과 연동
     URL="https://account.network3.ai/main?o=${IP_ADDRESS}:8080"
