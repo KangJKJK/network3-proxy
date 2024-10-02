@@ -74,8 +74,8 @@ for proxy in $(< proxy.txt); do
     # 네트워크 설치 스크립트 시작
     echo -e "${GREEN}Network3 노드를 실행합니다.${NC}"
 
-    # Docker 컨테이너 이름 생성
-    container_name="network3_node_$(echo $proxy | md5sum | cut -d' ' -f1)"
+    # Docker 컨테이너 이름 생성 (타임스탬프 추가)
+    container_name="network3_node_$(echo $proxy | md5sum | cut -d' ' -f1)_$(date +%s)"
 
 # Dockerfile 생성
 cat <<EOF > Dockerfile
