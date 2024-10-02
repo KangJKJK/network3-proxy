@@ -86,13 +86,16 @@ cat <<EOF > Dockerfile
 FROM ubuntu:latest
 
 # 필수 패키지 설치
-RUN apt-get update && apt-get install -y wireguard-tools curl net-tools iptables
+RUN apt-get update && apt-get install -y wireguard-tools curl net-tools iptables dos2unix
 
 # 작업 디렉토리로 이동
 WORKDIR /root/ubuntu-node
 
 # change_ports.sh 스크립트 다운로드 및 실행 권한 부여
 RUN curl -o /root/ubuntu-node/change_ports.sh https://raw.githubusercontent.com/KangJKJK/network3-changeport/refs/heads/main/change.ports.sh && chmod +x /root/ubuntu-node/change_ports.sh
+
+# change_ports.sh 파일을 Unix 스타일로 변환
+RUN dos2unix /root/ubuntu-node/change_ports.sh
 
 # 포트 변경 스크립트 실행
 RUN bash /root/ubuntu-node/change_ports.sh
