@@ -105,9 +105,6 @@ RUN mkdir -p /usr/local/etc/wireguard && \
     wg genkey > /usr/local/etc/wireguard/utun.key && \
     chmod 600 /usr/local/etc/wireguard/utun.key
 
-# 포트 변경 스크립트 실행
-RUN bash /root/ubuntu-node/change_ports.sh
-
 # 스크립트 실행
 CMD ["bash", "/root/ubuntu-node/manager.sh", "up"]
 EOF
