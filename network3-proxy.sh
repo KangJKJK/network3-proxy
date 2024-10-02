@@ -172,6 +172,7 @@ EOF
         $container_name
 
     # 개인키 확인
+    echo -e "${GREEN}위에 출력된 값은 Docker 컨테이너의 ID입니다.${NC}"
     req "노드의 개인키를 확인하시고 적어두세요." docker exec -it $container_name bash -c "cat /usr/local/etc/wireguard/utun.key"
 
     # IP 주소 확인
