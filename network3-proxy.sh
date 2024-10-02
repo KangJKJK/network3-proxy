@@ -133,7 +133,7 @@ FROM ubuntu:latest
 RUN apt-get update && apt-get install -y wireguard-tools curl net-tools iptables dos2unix ufw iproute2
 
 # Node.js 설치
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - && \
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y nodejs
 
 # 작업 디렉토리로 이동
