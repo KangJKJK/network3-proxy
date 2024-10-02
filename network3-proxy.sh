@@ -73,60 +73,63 @@ for proxy in $(< proxy.txt); do
 
     # Dockerfile 생성
     cat <<EOF > Dockerfile
-    FROM ubuntu:latest
+FROM ubuntu:latest
 
-    # 필수 패키지 설치
-    RUN apt-get update && apt-get install -y wireguard-tools curl net-tools iptables
-    
-    # 작업 디렉토리 생성
-    RUN mkdir -p /root/ubuntu-node
-    
-    # 스크립트 복사
-    COPY . /root/ubuntu-node
-    
-    # 작업 디렉토리로 이동
-    WORKDIR /root/ubuntu-node
+# 필수 패키지 설치
+RUN apt-get update && apt-get install -y wireguard-tools curl net-tools iptables
+
+# 작업 디렉토리 생성
+RUN mkdir -p /root/ubuntu-node
+
+# 스크립트 복사
+COPY . /root/ubuntu-node
+
+# 작업 디렉토리로 이동
+WORKDIR /root/ubuntu-node
+
+# ListenPort 값을 변경하는 함수
+change_port() {
+  WG_CONFIG="/root/ubuntu-node/wg0.conf"
+  DEFAULT_PORT=1433
+  CURRENT_PORT=$DEFAULT_PORT
+
+  # 포트가 사용 중인지 확인
+  while sudo netstat -tuln | grep -q ":$CURRENT_PORT "; do
+    echo -e "${YELLOW}포트 $CURRENT_PORT 가 사용 중입니다. 다음 포트로 시도합니다.${NC}"
+    CURRENT_PORT=$((CURRENT_PORT + 1))
+  done
+
+  echo -e "${GREEN}사용 가능한 포트는 $CURRENT_PORT 입니다.${NC}"
+
+  # wg0.conf 파일의 ListenPort 값을 변경
+  if [ -f "$WG_CONFIG" ]; then
+    sudo sed -i "s/^ListenPort *=.*/ListenPort = $CURRENT_PORT/" "$WG_CONFIG"
+    echo -e "${GREEN}ListenPort를 $CURRENT_PORT 로 변경했습니다.${NC}"
+  else
+    echo -e "${RED}$WG_CONFIG 파일을 찾을 수 없습니다.${NC}"
+    exit 1
+  fi
+
+  # 포트 열기
+  sudo ufw allow $CURRENT_PORT
+  echo -e "${GREEN}포트 $CURRENT_PORT 을(를) 방화벽에서 열었습니다.${NC}"
+}
+
+# 포트 변경 함수 호출
+change_port
+
+# 스크립트 실행
+CMD ["bash", "/root/ubuntu-node/manager.sh", "up"]
+EOF
 
     # Docker 이미지 빌드
     docker build -t $container_name .
 
-    # ListenPort 값을 변경하는 함수
-    change_port() {
-      WG_CONFIG="/root/ubuntu-node/wg0.conf"
-      DEFAULT_PORT=1433
-      CURRENT_PORT=$DEFAULT_PORT
+    # Docker 컨테이너 실행
+    docker run -d --name $container_name --env http_proxy=$http_proxy --env https_proxy=$https_proxy $container_name
 
-      # 포트가 사용 중인지 확인
-      while sudo netstat -tuln | grep -q ":$CURRENT_PORT "; do
-        echo -e "${YELLOW}포트 $CURRENT_PORT 가 사용 중입니다. 다음 포트로 시도합니다.${NC}"
-        CURRENT_PORT=$((CURRENT_PORT + 1))
-       done
-
-      echo -e "${GREEN}사용 가능한 포트는 $CURRENT_PORT 입니다.${NC}"
-
-      # wg0.conf 파일의 ListenPort 값을 변경
-      if [ -f "$WG_CONFIG" ]; then
-        sudo sed -i "s/^ListenPort *=.*/ListenPort = $CURRENT_PORT/" "$WG_CONFIG"
-        echo -e "${GREEN}ListenPort를 $CURRENT_PORT 로 변경했습니다.${NC}"
-      else
-        echo -e "${RED}$WG_CONFIG 파일을 찾을 수 없습니다.${NC}"
-        exit 1
-      fi
-
-      # 포트 열기
-      sudo ufw allow $CURRENT_PORT
-      echo -e "${GREEN}포트 $CURRENT_PORT 을(를) 방화벽에서 열었습니다.${NC}"
-    }
-
-    # 포트 변경 함수 호출
-    change_port
-
-    # 스크립트 실행
-    CMD ["bash", "/root/ubuntu-node/manager.sh", "up"]
-    EOF
-    
     # 개인키 확인
-    req "노드의 개인키를 확인하시고 적어두세요." sudo -E bash /root/ubuntu-node/manager.sh key
+    req "노드의 개인키를 확인하시고 적어두세요." docker exec -it $container_name bash -c "/root/ubuntu-node/manager.sh key"
 
     # IP 주소 확인
     IP_ADDRESS=$(curl -s ifconfig.me)
