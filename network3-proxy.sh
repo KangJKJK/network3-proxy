@@ -106,7 +106,7 @@ RUN mkdir -p /usr/local/etc/wireguard && \
     chmod 600 /usr/local/etc/wireguard/utun.key
 
 # 스크립트 실행
-CMD ["bash", "/root/ubuntu-node/manager.sh", "up"]
+ENTRYPOINT ["bash", "/root/ubuntu-node/manager.sh", "up"]
 EOF
 
     # Docker 이미지 빌드
