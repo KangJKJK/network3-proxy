@@ -39,8 +39,8 @@ cd /root/ubuntu-node
 sudo git clone https://github.com/KangJKJK/network3-base /root/ubuntu-node
 
 # 프록시 입력받기
-echo -e "${YELLOW}보유하신 모든 Proxy를 chatgpt에게 다음과 같은 형식으로 변환해달라고 하세요.${NC}"
-echo -e "${YELLOW}이러한 형태로 각 프록시를 한줄에 하나씩 입력하세요: http://username:password@proxy_host:port${NC}"
+echo -e "${YELLOW}보유하신 모든 Proxy를 다음과 같은 형식으로 입력하세요:${NC}"
+echo -e "${YELLOW}http://username:password@proxy_host:port${NC}"
 echo -e "${YELLOW}프록시 입력 후 엔터를 두번 누르면 됩니다.${NC}"
 > proxy.txt  # proxy.txt 파일 초기화
 
@@ -51,6 +51,10 @@ while true; do
     fi
     echo "$proxy" >> proxy.txt
 done
+
+# 시작 포트 설정
+HOST_START_PORT1=1433
+HOST_START_PORT2=51820
 
 # 모든 프록시 처리
 for proxy in $(< proxy.txt); do
@@ -68,14 +72,31 @@ for proxy in $(< proxy.txt); do
     rm -rf /usr/local/etc/wireguard/utun.key
     rm -f /usr/local/etc/wireguard/utun.key
     mkdir -p /usr/local/etc/wireguard
-    apt install wireguard-tools
+    apt install wireguard-tools -y
     wg genkey > /usr/local/etc/wireguard/utun.key
     
     # 네트워크 설치 스크립트 시작
     echo -e "${GREEN}Network3 노드를 실행합니다.${NC}"
 
-    # Docker 컨테이너 이름 생성 (타임스탬프 추가)
+    # Docker 컨테이너 이름 생성 (타임스탬프 및 프록시 해시 추가)
     container_name="network3_node_$(echo $proxy | md5sum | cut -d' ' -f1)_$(date +%s)"
+
+    # 호스트 포트 할당
+    HOST_PORT1=$HOST_START_PORT1
+    HOST_PORT2=$HOST_START_PORT2
+
+    # 사용 가능한 호스트 포트 찾기
+    while ss -tuln | grep -q ":$HOST_PORT1 " ; do
+      echo -e "${YELLOW}호스트 포트 $HOST_PORT1 이(가) 사용 중입니다. 다음 포트로 시도합니다.${NC}"
+      HOST_PORT1=$((HOST_PORT1 + 1))
+    done
+
+    while ss -tuln | grep -q ":$HOST_PORT2 " ; do
+      echo -e "${YELLOW}호스트 포트 $HOST_PORT2 이(가) 사용 중입니다. 다음 포트로 시도합니다.${NC}"
+      HOST_PORT2=$((HOST_PORT2 + 1))
+    done
+
+    echo -e "${GREEN}호스트 포트는 $HOST_PORT1 와 $HOST_PORT2 입니다.${NC}"
 
     # Dockerfile 생성
     cat <<EOF > Dockerfile
@@ -87,11 +108,9 @@ RUN apt-get update && apt-get install -y wireguard-tools curl net-tools iptables
 # 작업 디렉토리로 이동
 WORKDIR /root/ubuntu-node
 
-# change_ports.sh 스크립트 다운로드 및 실행 권한 부여
-RUN curl -f -o /root/ubuntu-node/change_ports.sh https://raw.githubusercontent.com/KangJKJK/network3-changeport/refs/heads/main/change_ports.sh && chmod +x /root/ubuntu-node/change_ports.sh
-
-# change_ports.sh 파일을 Unix 스타일로 변환
-RUN dos2unix /root/ubuntu-node/change_ports.sh
+# change_ports.sh 스크립트 복사
+COPY change_ports.sh /root/ubuntu-node/change_ports.sh
+RUN chmod +x /root/ubuntu-node/change_ports.sh
 
 # wg0.conf 파일 복사
 COPY wg0.conf /root/ubuntu-node/wg0.conf
@@ -105,18 +124,28 @@ RUN mkdir -p /usr/local/etc/wireguard && \
     wg genkey > /usr/local/etc/wireguard/utun.key && \
     chmod 600 /usr/local/etc/wireguard/utun.key
 
+# 스크립트 실행 시 포트 환경 변수 전달
+ENV START_PORT1=$HOST_PORT1
+ENV START_PORT2=$HOST_PORT2
+
 # 스크립트 실행
-ENTRYPOINT ["bash", "/root/ubuntu-node/manager.sh", "up"]
+ENTRYPOINT ["bash", "/root/ubuntu-node/change_ports.sh"]
+CMD ["bash", "/root/ubuntu-node/manager.sh", "up"]
 EOF
 
     # Docker 이미지 빌드
     docker build -t $container_name .
 
-    # Docker 컨테이너 실행
-    docker run --privileged -d --name $container_name --env http_proxy=$http_proxy --env https_proxy=$https_proxy $container_name
+    # Docker 컨테이너 실행 시 호스트 포트와 컨테이너 포트 매핑
+    docker run --privileged -d --name $container_name \
+        -p $HOST_PORT1:1433 \
+        -p $HOST_PORT2:51820 \
+        --env http_proxy=$http_proxy \
+        --env https_proxy=$https_proxy \
+        $container_name
 
     # 개인키 확인
-    req "노드의 개인키를 확인하시고 적어두세요." docker exec -it $container_name bash -c "/root/ubuntu-node/manager.sh key"
+    req "노드의 개인키를 확인하시고 적어두세요." docker exec -it $container_name bash -c "cat /usr/local/etc/wireguard/utun.key"
 
     # IP 주소 확인
     IP_ADDRESS=$(curl -s ifconfig.me)
@@ -137,6 +166,10 @@ EOF
     # 사용자 확인을 위해 입력 대기
     echo -e "${BOLD}계속 진행하려면 엔터를 눌러 주세요.${NC}"
     read -r  # 사용자가 엔터를 누르기를 기다림
+
+    # 호스트 포트 증가
+    HOST_START_PORT1=$((HOST_PORT1 + 1))
+    HOST_START_PORT2=$((HOST_PORT2 + 1))
 
 done
 
