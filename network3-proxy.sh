@@ -92,12 +92,6 @@ echo -e "\033[0;32m포트 $CURRENT_PORT 을(를) 방화벽에서 열었습니다
 bash /root/ubuntu-node/manager.sh up
 EOF
 
-# utun.key 파일 생성 (한 번만 생성)
-if [ ! -f utun.key ]; then
-  wg genkey > utun.key
-  chmod 600 utun.key
-fi
-
 # 모든 프록시 처리
 for proxy in $(< proxy.txt); do
     # 프록시가 비어있으면 넘어감
@@ -126,6 +120,10 @@ for proxy in $(< proxy.txt); do
     done
 
     echo -e "${GREEN}호스트 포트는 $HOST_PORT 입니다.${NC}"
+
+    # utun.key 파일 생성
+    wg genkey > utun.key
+    chmod 600 utun.key
 
     # Dockerfile 생성
     cat <<EOF > Dockerfile
