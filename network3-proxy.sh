@@ -96,6 +96,10 @@ RUN dos2unix /root/ubuntu-node/change_ports.sh
 # wg0.conf 파일 복사
 COPY wg0.conf /root/ubuntu-node/wg0.conf
 
+# manager.sh 파일 복사
+COPY manager.sh /root/ubuntu-node/manager.sh
+RUN chmod +x /root/ubuntu-node/manager.sh
+
 # 포트 변경 스크립트 실행
 RUN bash /root/ubuntu-node/change_ports.sh
 
