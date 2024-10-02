@@ -97,6 +97,7 @@ bash /root/ubuntu-node/manager.sh up
 
 # 컨테이너가 종료되지 않도록 포그라운드에서 대기
 exec tail -f /dev/null
+EOF
 
 # 모든 프록시 처리
 for proxy in $(< proxy.txt); do
