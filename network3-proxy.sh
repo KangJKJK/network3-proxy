@@ -41,7 +41,7 @@ sudo git clone https://github.com/KangJKJK/network3-base /root/ubuntu-node
 # 프록시 입력받기
 echo -e "${YELLOW}보유하신 모든 Proxy를 다음과 같은 형식으로 입력하세요:${NC}"
 echo -e "${YELLOW}http://username:password@proxy_host:port${NC}"
-echo -e "${YELLOW}프록시 입력 후 엔터를 두번 누르면 됩니다.${NC}"
+echo -e "${YELLOW}프록시 입력 후 엔터를 두 번 누르면 됩니다.${NC}"
 > proxy.txt  # proxy.txt 파일 초기화
 
 while true; do
@@ -53,8 +53,7 @@ while true; do
 done
 
 # 시작 포트 설정
-HOST_START_PORT1=1433
-HOST_START_PORT2=51820
+HOST_START_PORT=1433
 
 # 모든 프록시 처리
 for proxy in $(< proxy.txt); do
@@ -67,36 +66,30 @@ for proxy in $(< proxy.txt); do
     echo -e "${GREEN}프록시 ${proxy}로 노드를 백그라운드에서 실행합니다.${NC}"
     export http_proxy="$proxy"  # 프록시 설정
     export https_proxy="$proxy"  # HTTPS 프록시 설정
-    
+
     # 노드키 초기화 및 재생성
     rm -rf /usr/local/etc/wireguard/utun.key
     rm -f /usr/local/etc/wireguard/utun.key
     mkdir -p /usr/local/etc/wireguard
     apt install wireguard-tools -y
     wg genkey > /usr/local/etc/wireguard/utun.key
-    
+
     # 네트워크 설치 스크립트 시작
     echo -e "${GREEN}Network3 노드를 실행합니다.${NC}"
 
-    # Docker 컨테이너 이름 생성 (타임스탬프 및 프록시 해시 추가)
+    # Docker 컨테이너 이름 생성 (프록시 해시 및 타임스탬프 추가)
     container_name="network3_node_$(echo $proxy | md5sum | cut -d' ' -f1)_$(date +%s)"
 
     # 호스트 포트 할당
-    HOST_PORT1=$HOST_START_PORT1
-    HOST_PORT2=$HOST_START_PORT2
+    HOST_PORT=$HOST_START_PORT
 
     # 사용 가능한 호스트 포트 찾기
-    while ss -tuln | grep -q ":$HOST_PORT1 " ; do
-      echo -e "${YELLOW}호스트 포트 $HOST_PORT1 이(가) 사용 중입니다. 다음 포트로 시도합니다.${NC}"
-      HOST_PORT1=$((HOST_PORT1 + 1))
+    while ss -tuln | grep -q ":$HOST_PORT " ; do
+      echo -e "${YELLOW}호스트 포트 $HOST_PORT 이(가) 사용 중입니다. 다음 포트로 시도합니다.${NC}"
+      HOST_PORT=$((HOST_PORT + 1))
     done
 
-    while ss -tuln | grep -q ":$HOST_PORT2 " ; do
-      echo -e "${YELLOW}호스트 포트 $HOST_PORT2 이(가) 사용 중입니다. 다음 포트로 시도합니다.${NC}"
-      HOST_PORT2=$((HOST_PORT2 + 1))
-    done
-
-    echo -e "${GREEN}호스트 포트는 $HOST_PORT1 와 $HOST_PORT2 입니다.${NC}"
+    echo -e "${GREEN}호스트 포트는 $HOST_PORT 입니다.${NC}"
 
     # Dockerfile 생성
     cat <<EOF > Dockerfile
@@ -120,13 +113,11 @@ COPY manager.sh /root/ubuntu-node/manager.sh
 RUN chmod +x /root/ubuntu-node/manager.sh
 
 # utun.key 파일 생성 및 권한 설정
-RUN mkdir -p /usr/local/etc/wireguard && \
-    wg genkey > /usr/local/etc/wireguard/utun.key && \
-    chmod 600 /usr/local/etc/wireguard/utun.key
+COPY utun.key /usr/local/etc/wireguard/utun.key
+RUN chmod 600 /usr/local/etc/wireguard/utun.key
 
 # 스크립트 실행 시 포트 환경 변수 전달
-ENV START_PORT1=$HOST_PORT1
-ENV START_PORT2=$HOST_PORT2
+ENV START_PORT=$HOST_PORT
 
 # 스크립트 실행
 ENTRYPOINT ["bash", "/root/ubuntu-node/change_ports.sh"]
@@ -138,8 +129,7 @@ EOF
 
     # Docker 컨테이너 실행 시 호스트 포트와 컨테이너 포트 매핑
     docker run --privileged -d --name $container_name \
-        -p $HOST_PORT1:1433 \
-        -p $HOST_PORT2:51820 \
+        -p $HOST_PORT:1433 \
         --env http_proxy=$http_proxy \
         --env https_proxy=$https_proxy \
         $container_name
@@ -154,7 +144,7 @@ EOF
         continue
     fi
     req "사용자의 IP주소를 확인합니다." echo "사용자의 IP는 ${IP_ADDRESS}입니다."
-    
+
     # 웹계정과 연동
     URL="https://account.network3.ai/main?o=${IP_ADDRESS}:8080"
     echo "You can access the dashboard by opening ${URL} in Chrome." >&2
@@ -162,14 +152,13 @@ EOF
     echo -e "${YELLOW}다음 URL로 접속하세요: ${URL}${NC}"
     echo -e "${YELLOW}1. 좌측 상단의 Login버튼을 누르고 이메일 계정으로 로그인을 진행하세요.${NC}"
     echo -e "${YELLOW}2. 다시 URL로 접속하신 후 Current node에서 +버튼을 누르고 노드의 개인키를 적어주세요.${NC}"
-    
+
     # 사용자 확인을 위해 입력 대기
     echo -e "${BOLD}계속 진행하려면 엔터를 눌러 주세요.${NC}"
     read -r  # 사용자가 엔터를 누르기를 기다림
 
     # 호스트 포트 증가
-    HOST_START_PORT1=$((HOST_PORT1 + 1))
-    HOST_START_PORT2=$((HOST_PORT2 + 1))
+    HOST_START_PORT=$((HOST_PORT + 1))
 
 done
 
