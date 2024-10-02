@@ -38,10 +38,6 @@ cd /root/ubuntu-node
 
 sudo git clone https://github.com/KangJKJK/network3-base /root/ubuntu-node
 
-# change_ports.sh 스크립트 다운로드
-curl -o change_ports.sh https://raw.githubusercontent.com/KangJKJK/network3-changeport/refs/heads/main/change.ports.sh
-chmod +x change_ports.sh
-
 # 프록시 입력받기
 echo -e "${YELLOW}보유하신 모든 Proxy를 chatgpt에게 다음과 같은 형식으로 변환해달라고 하세요.${NC}"
 echo -e "${YELLOW}이러한 형태로 각 프록시를 한줄에 하나씩 입력하세요: http://username:password@proxy_host:port${NC}"
