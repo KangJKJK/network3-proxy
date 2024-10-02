@@ -1,4 +1,4 @@
-`#!/bin/bash
+#!/bin/bash
 
 # 색깔 변수 정의
 BOLD='\033[1m'
