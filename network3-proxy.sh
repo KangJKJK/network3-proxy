@@ -57,7 +57,7 @@ for proxy in $(< proxy.txt); do
     echo -e "${GREEN}프록시 ${proxy}로 노드를 백그라운드에서 실행합니다.${NC}"
     export http_proxy="$proxy"  # 프록시 설정
     export https_proxy="$proxy"  # HTTPS 프록시 설정
-
+    
     # 노드키 초기화 및 재생성
     rm -rf /usr/local/etc/wireguard/utun.key
     rm -f /usr/local/etc/wireguard/utun.key
@@ -67,6 +67,28 @@ for proxy in $(< proxy.txt); do
     
     # 네트워크 설치 스크립트 시작
     echo -e "${GREEN}Network3 노드를 실행합니다.${NC}"
+
+    # Docker 컨테이너 이름 생성
+    container_name="network3_node_$(echo $proxy | md5sum | cut -d' ' -f1)"
+
+    # Dockerfile 생성
+    cat <<EOF > Dockerfile
+    FROM ubuntu:latest
+
+    # 필수 패키지 설치
+    RUN apt-get update && apt-get install -y wireguard-tools curl net-tools iptables
+    
+    # 작업 디렉토리 생성
+    RUN mkdir -p /root/ubuntu-node
+    
+    # 스크립트 복사
+    COPY . /root/ubuntu-node
+    
+    # 작업 디렉토리로 이동
+    WORKDIR /root/ubuntu-node
+
+    # Docker 이미지 빌드
+    docker build -t $container_name .
 
     # ListenPort 값을 변경하는 함수
     change_port() {
@@ -78,7 +100,7 @@ for proxy in $(< proxy.txt); do
       while sudo netstat -tuln | grep -q ":$CURRENT_PORT "; do
         echo -e "${YELLOW}포트 $CURRENT_PORT 가 사용 중입니다. 다음 포트로 시도합니다.${NC}"
         CURRENT_PORT=$((CURRENT_PORT + 1))
-      done
+       done
 
       echo -e "${GREEN}사용 가능한 포트는 $CURRENT_PORT 입니다.${NC}"
 
@@ -97,10 +119,11 @@ for proxy in $(< proxy.txt); do
     }
 
     # 포트 변경 함수 호출
-    change_port  # 이 부분 추가
+    change_port
 
-    # 노드를 백그라운드에서 실행하는 함수
-    sudo -E bash /root/ubuntu-node/manager.sh up
+    # 스크립트 실행
+    CMD ["bash", "/root/ubuntu-node/manager.sh", "up"]
+    EOF
     
     # 개인키 확인
     req "노드의 개인키를 확인하시고 적어두세요." sudo -E bash /root/ubuntu-node/manager.sh key
