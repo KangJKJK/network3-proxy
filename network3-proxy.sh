@@ -77,8 +77,8 @@ for proxy in $(< proxy.txt); do
     # Docker 컨테이너 이름 생성 (타임스탬프 추가)
     container_name="network3_node_$(echo $proxy | md5sum | cut -d' ' -f1)_$(date +%s)"
 
-# Dockerfile 생성
-cat <<EOF > Dockerfile
+    # Dockerfile 생성
+    cat <<EOF > Dockerfile
 FROM ubuntu:latest
 
 # 필수 패키지 설치
@@ -113,7 +113,7 @@ EOF
     docker build -t $container_name .
 
     # Docker 컨테이너 실행
-    docker run -d --name $container_name --env http_proxy=$http_proxy --env https_proxy=$https_proxy $container_name
+    docker run --privileged -d --name $container_name --env http_proxy=$http_proxy --env https_proxy=$https_proxy $container_name
 
     # 개인키 확인
     req "노드의 개인키를 확인하시고 적어두세요." docker exec -it $container_name bash -c "/root/ubuntu-node/manager.sh key"
