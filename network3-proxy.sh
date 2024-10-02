@@ -38,6 +38,10 @@ cd /root/ubuntu-node
 
 sudo git clone https://github.com/KangJKJK/network3-base /root/ubuntu-node
 
+# change_ports.sh 스크립트 다운로드
+curl -o change_ports.sh https://raw.githubusercontent.com/KangJKJK/network3-changeport/refs/heads/main/change.ports.sh
+chmod +x change_ports.sh
+
 # 프록시 입력받기
 echo -e "${YELLOW}보유하신 모든 Proxy를 chatgpt에게 다음과 같은 형식으로 변환해달라고 하세요.${NC}"
 echo -e "${YELLOW}이러한 형태로 각 프록시를 한줄에 하나씩 입력하세요: http://username:password@proxy_host:port${NC}"
@@ -84,53 +88,11 @@ FROM ubuntu:latest
 # 필수 패키지 설치
 RUN apt-get update && apt-get install -y wireguard-tools curl net-tools iptables
 
-# 작업 디렉토리 생성
-RUN mkdir -p /root/ubuntu-node
-
-# 스크립트 복사
-COPY . /root/ubuntu-node
-
 # 작업 디렉토리로 이동
 WORKDIR /root/ubuntu-node
 
-# ListenPort 값을 변경하는 함수
-change_port() {
-WG_CONFIG="/root/ubuntu-node/wg0.conf"
-DEFAULT_PORT1=1433
-DEFAULT_PORT2=51820
-CURRENT_PORT1=$DEFAULT_PORT1
-CURRENT_PORT2=$DEFAULT_PORT2
-
-# 포트가 사용 중인지 확인
-while sudo netstat -tuln | grep -q ":$CURRENT_PORT1 "; do
-  echo -e "${YELLOW}포트 $CURRENT_PORT1 가 사용 중입니다. 다음 포트로 시도합니다.${NC}"
-  CURRENT_PORT1=$((CURRENT_PORT1 + 1))
-done
-
-while sudo netstat -tuln | grep -q ":$CURRENT_PORT2 "; do
-  echo -e "${YELLOW}포트 $CURRENT_PORT2 가 사용 중입니다. 다음 포트로 시도합니다.${NC}"
-  CURRENT_PORT2=$((CURRENT_PORT2 + 1))
-done
-
-echo -e "${GREEN}사용 가능한 포트는 $CURRENT_PORT1 와 $CURRENT_PORT2 입니다.${NC}"
-
-# wg0.conf 파일의 ListenPort 값을 변경
-if [ -f "$WG_CONFIG" ]; then
-  sudo sed -i "s/^ListenPort1 *=.*/ListenPort1 = $CURRENT_PORT1/" "$WG_CONFIG"
-  sudo sed -i "s/^ListenPort2 *=.*/ListenPort2 = $CURRENT_PORT2/" "$WG_CONFIG"
-  echo -e "${GREEN}ListenPort1를 $CURRENT_PORT1 로, ListenPort2를 $CURRENT_PORT2 로 변경했습니다.${NC}"
-else
-  echo -e "${RED}$WG_CONFIG 파일을 찾을 수 없습니다.${NC}"
-  exit 1
-fi
-
-# 포트 열기
-sudo ufw allow $CURRENT_PORT1
-sudo ufw allow $CURRENT_PORT2
-echo -e "${GREEN}포트 $CURRENT_PORT1 와 $CURRENT_PORT2 을(를) 방화벽에서 열었습니다.${NC}"
-
-# 포트 변경 함수 호출
-change_port
+# 포트 변경 스크립트 실행
+RUN bash /root/ubuntu-node/change_ports.sh
 
 # 스크립트 실행
 CMD ["bash", "/root/ubuntu-node/manager.sh", "up"]
@@ -155,6 +117,7 @@ EOF
     
     # 웹계정과 연동
     URL="https://account.network3.ai/main?o=${IP_ADDRESS}:8080"
+    echo "You can access the dashboard by opening ${URL} in Chrome." >&2
     echo -e "${GREEN}웹계정과 연동을 진행합니다.${NC}"
     echo -e "${YELLOW}다음 URL로 접속하세요: ${URL}${NC}"
     echo -e "${YELLOW}1. 좌측 상단의 Login버튼을 누르고 이메일 계정으로 로그인을 진행하세요.${NC}"
