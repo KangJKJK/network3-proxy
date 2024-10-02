@@ -92,9 +92,11 @@ echo -e "\033[0;32m포트 $CURRENT_PORT 을(를) 방화벽에서 열었습니다
 bash /root/ubuntu-node/manager.sh up
 EOF
 
-# utun.key 파일 생성
-wg genkey > utun.key
-chmod 600 utun.key
+# utun.key 파일 생성 (한 번만 생성)
+if [ ! -f utun.key ]; then
+  wg genkey > utun.key
+  chmod 600 utun.key
+fi
 
 # 모든 프록시 처리
 for proxy in $(< proxy.txt); do
@@ -107,13 +109,6 @@ for proxy in $(< proxy.txt); do
     echo -e "${GREEN}프록시 ${proxy}로 노드를 백그라운드에서 실행합니다.${NC}"
     export http_proxy="$proxy"  # 프록시 설정
     export https_proxy="$proxy"  # HTTPS 프록시 설정
-
-    # 노드키 초기화 및 재생성
-    rm -rf /usr/local/etc/wireguard/utun.key
-    rm -f /usr/local/etc/wireguard/utun.key
-    mkdir -p /usr/local/etc/wireguard
-    apt install wireguard-tools -y
-    wg genkey > /usr/local/etc/wireguard/utun.key
 
     # 네트워크 설치 스크립트 시작
     echo -e "${GREEN}Network3 노드를 실행합니다.${NC}"
@@ -138,6 +133,10 @@ FROM ubuntu:latest
 
 # 필수 패키지 설치
 RUN apt-get update && apt-get install -y wireguard-tools curl net-tools iptables dos2unix ufw iproute2
+
+# Node.js 설치
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - && \
+    apt-get install -y nodejs
 
 # 작업 디렉토리로 이동
 WORKDIR /root/ubuntu-node
@@ -165,7 +164,7 @@ ENTRYPOINT ["bash", "/root/ubuntu-node/change_ports.sh"]
 EOF
 
     # Docker 이미지 빌드
-    docker build -t $container_name .
+    docker build --no-cache -t $container_name .
 
     # Docker 컨테이너 실행 시 호스트 포트와 컨테이너 포트 매핑
     docker run --privileged -d --name $container_name \
@@ -186,7 +185,7 @@ EOF
     req "사용자의 IP주소를 확인합니다." echo "사용자의 IP는 ${IP_ADDRESS}입니다."
 
     # 웹계정과 연동
-    URL="https://account.network3.ai/main?o=${IP_ADDRESS}:8080"
+    URL="http://account.network3.ai:8080/main?o=${IP_ADDRESS}:8080"
     echo "You can access the dashboard by opening ${URL} in Chrome." >&2
     echo -e "${GREEN}웹계정과 연동을 진행합니다.${NC}"
     echo -e "${YELLOW}다음 URL로 접속하세요: ${URL}${NC}"
