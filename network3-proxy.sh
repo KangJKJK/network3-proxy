@@ -1,4 +1,4 @@
-#!/bin/bash
+`#!/bin/bash
 
 # 색깔 변수 정의
 BOLD='\033[1m'
@@ -57,8 +57,6 @@ HOST_START_PORT=1433
 
 # change_ports.sh 스크립트 생성
 cat <<'EOF' > change_ports.sh
-#!/bin/bash
-
 #!/bin/bash
 
 echo "포트 변경 스크립트가 실행되었습니다."
