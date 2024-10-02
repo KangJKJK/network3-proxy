@@ -93,6 +93,9 @@ RUN curl -f -o /root/ubuntu-node/change_ports.sh https://raw.githubusercontent.c
 # change_ports.sh 파일을 Unix 스타일로 변환
 RUN dos2unix /root/ubuntu-node/change_ports.sh
 
+# wg0.conf 파일 복사
+COPY wg0.conf /root/ubuntu-node/wg0.conf
+
 # 포트 변경 스크립트 실행
 RUN bash /root/ubuntu-node/change_ports.sh
 
