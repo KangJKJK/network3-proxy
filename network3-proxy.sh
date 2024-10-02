@@ -90,6 +90,9 @@ echo -e "\033[0;32m포트 $CURRENT_PORT 을(를) 방화벽에서 열었습니다
 
 # manager.sh 스크립트 실행
 bash /root/ubuntu-node/manager.sh up
+
+# 컨테이너가 종료되지 않도록 포그라운드에서 대기
+tail -f /dev/null
 EOF
 
 # 모든 프록시 처리
