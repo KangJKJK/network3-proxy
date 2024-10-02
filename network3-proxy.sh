@@ -82,7 +82,7 @@ cat <<EOF > Dockerfile
 FROM ubuntu:latest
 
 # 필수 패키지 설치
-RUN apt-get update && apt-get install -y wireguard-tools curl net-tools iptables dos2unix ufw
+RUN apt-get update && apt-get install -y wireguard-tools curl net-tools iptables dos2unix ufw iproute2
 
 # 작업 디렉토리로 이동
 WORKDIR /root/ubuntu-node
