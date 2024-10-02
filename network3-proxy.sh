@@ -134,7 +134,6 @@ for proxy in $(< proxy.txt); do
 
     # Dockerfile 생성
     cat <<EOF > Dockerfile
-    
 FROM ubuntu:latest
 
 # 필수 패키지 설치
