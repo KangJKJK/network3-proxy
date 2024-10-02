@@ -133,10 +133,11 @@ for proxy in $(< proxy.txt); do
 
     # Dockerfile 생성
     cat <<EOF > Dockerfile
+    
 FROM ubuntu:latest
 
 # 필수 패키지 설치
-RUN apt-get update && apt-get install -y wireguard-tools curl net-tools iptables dos2unix ufw iproute2
+RUN apt-get update && apt-get install -y wireguard-tools curl net-tools iptables dos2unix ufw iproute2 git
 
 # Node.js 설치
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
@@ -149,21 +150,25 @@ WORKDIR /root/ubuntu-node
 COPY change_ports.sh /root/ubuntu-node/change_ports.sh
 RUN chmod +x /root/ubuntu-node/change_ports.sh
 
-# wg0.conf 파일 복사
-COPY wg0.conf /root/ubuntu-node/wg0.conf
-
 # manager.sh 파일 복사
 COPY manager.sh /root/ubuntu-node/manager.sh
 RUN chmod +x /root/ubuntu-node/manager.sh
+
+# wg0.conf 파일 복사
+COPY wg0.conf /root/ubuntu-node/wg0.conf
 
 # utun.key 파일 복사 및 권한 설정
 COPY utun.key /usr/local/etc/wireguard/utun.key
 RUN chmod 600 /usr/local/etc/wireguard/utun.key
 
-# 스크립트 실행 시 포트 환경 변수 전달
-ENV START_PORT=$HOST_PORT
+# 기타 필요한 파일 및 설정 복사 (예: install_docker.sh 등)
+# COPY install_docker.sh /root/ubuntu-node/install_docker.sh
+# RUN chmod +x /root/ubuntu-node/install_docker.sh
 
-# 스크립트 실행
+# 포트 환경 변수 설정
+ENV START_PORT=1433
+
+# ENTRYPOINT 설정
 ENTRYPOINT ["bash", "/root/ubuntu-node/change_ports.sh"]
 EOF
 
