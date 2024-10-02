@@ -88,7 +88,7 @@ RUN apt-get update && apt-get install -y wireguard-tools curl net-tools iptables
 WORKDIR /root/ubuntu-node
 
 # change_ports.sh 스크립트 다운로드 및 실행 권한 부여
-RUN curl -o /root/ubuntu-node/change_ports.sh https://raw.githubusercontent.com/KangJKJK/network3-changeport/refs/heads/main/change_ports.sh && chmod +x /root/ubuntu-node/change_ports.sh
+RUN curl -f -o /root/ubuntu-node/change_ports.sh https://raw.githubusercontent.com/KangJKJK/network3-changeport/refs/heads/main/change_ports.sh && chmod +x /root/ubuntu-node/change_ports.sh
 
 # change_ports.sh 파일을 Unix 스타일로 변환
 RUN dos2unix /root/ubuntu-node/change_ports.sh
